@@ -1,0 +1,25 @@
+name: scrape latest data
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "6,26,46 * * * *"
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@v3
+      - name: fetch latest data
+        run: |
+          curl 'https://www.eco-visio.net/api/aladdin/1.0.0/pbl/publicwebpage/data/353298605?begin=20220121&step=4&domain=681&withNull=true&t=ed4b43eee8fc3c1232c42e378136ebabe142b88df6fa83556d97b5e4d5b97344' | jq > sd-30th-bike-lane.json
+      - name: Commit and push if it changed
+        run: |-
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          timestamp=$(date -u)
+          git commit -m "Latest data: ${timestamp}" || exit 0
+          git push
